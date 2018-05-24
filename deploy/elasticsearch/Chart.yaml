@@ -1,17 +1,33 @@
-appVersion: "5.4"
-description: Flexible and powerful open source, distributed real-time search and analytics
+# ============================================================================
+# Based on the `incubator/elasticsearch@0.4.9` chart by
+#   
+# -   Christian Simon <christian@jetstack.io>
+# -   Michael Haselton <michael.haselton@gmail.com>
+# 
+# See
+# 
+# 1.  Current chart
+#     -   https://github.com/kubernetes/charts/tree/master/incubator/elasticsearch
+#         
+# 2.  Forked version
+#     -   https://github.com/kubernetes/charts/tree/5e368b512edd10bc4f3612a64f713d83c1e63687/incubator/elasticsearch
+# 
+# ============================================================================
+
+appVersion: "6.2.3"
+description: >-
+  Flexible and powerful open source, distributed real-time search and analytics
   engine.
 home: https://www.elastic.co/products/elasticsearch
 icon: https://static-www.elastic.co/assets/blteb1c97719574938d/logo-elastic-elasticsearch-lt.svg
 maintainers:
-- email: christian@jetstack.io
-  name: Christian Simon
-- email: michael.haselton@gmail.com
-  name: Michael Haselton
+- email: neil@beiarea.com
+  name: Neil Souza
 name: elasticsearch
 sources:
+- https://github.com/kubernetes/charts/tree/5e368b512edd10bc4f3612a64f713d83c1e63687/incubator/elasticsearch
 - https://www.elastic.co/products/elasticsearch
 - https://github.com/jetstack/elasticsearch-pet
 - https://github.com/giantswarm/kubernetes-elastic-stack
 - https://github.com/GoogleCloudPlatform/elasticsearch-docker
-version: 0.4.9
+version: 0.1.0

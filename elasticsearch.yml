@@ -1,0 +1,27 @@
+# ============================================================================
+# ElasticSearch config from the `CenterForOpenScience/docker-library` repo
+# 
+# Copied from:
+# 
+#     https://github.com/CenterForOpenScience/docker-library/blob/621727bdaa4275595bf5fde7fbb01c8d8e87ccf4/elasticsearch/6.1/elasticsearch.yml
+# 
+# However, we have only used the resulting images via the Helm chart in
+# `//deploy/elasticsearch`, which overwrites this file from my understanding,
+# so I really have no idea if it works... I just included it to stay as close
+# to the Center for Open Science builds as possible.
+# ============================================================================
+
+network.host: 0.0.0.0
+
+processors: ${PROCESSORS:}
+
+# minimum_master_nodes need to be explicitly set when bound on a public IP
+# set to 1 to allow single node clusters
+# Details: https://github.com/elastic/elasticsearch/pull/17288
+discovery.zen.minimum_master_nodes: 1
+
+# see https://www.elastic.co/guide/en/x-pack/current/xpack-settings.html
+xpack.ml.enabled: ${XPACK_ML_ENABLED:false}
+xpack.monitoring.enabled: ${XPACK_MONITORING_ENABLED:false}
+xpack.security.enabled: ${XPACK_SECURITY_ENABLED:false}
+xpack.watcher.enabled: ${XPACK_WATCHER_ENABLED:false}

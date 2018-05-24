@@ -1,0 +1,47 @@
+# General Files & Artifacts
+# ============================================================================
+
+# OSX
+**/.DS_Store
+
+# Backup files
+**/*.backup
+
+# Git 
+**/.git/
+**/.git
+**/.git*
+
+# Docker
+**/*Dockerfile
+**/.dockerignore
+
+# QB / Ansible
+**/.qb-options.yml
+**/.qb-playbook.yml
+**/.qb-playbook.retry
+**/ansible-error.log
+
+
+# Project Files
+# ============================================================================
+# 
+# Not that it matters since we never do an `ADD`...? But anyways...
+# 
+# In alphabetical order so it's easy to line up with tree view.
+#
+
+# Deployment stuff (Helm chart)
+dev/
+
+# Development-only stuff
+deploy/
+
+# Assorted temp stuffs
+tmp/
+
+# Don't need the license in there
+LICENSE
+
+# Or the readme really
+README.md

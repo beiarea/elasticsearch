@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{ template "elasticsearch-single-node.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+  name: {{ template "elasticsearch-single-node.fullname" . }}
+  {{- if .Values.serviceAnnotations }}
+  annotations:
+    {{ toYaml .Values.serviceAnnotations | indent 4 | trim }}
+  {{- end }}
+
+# /metadata
+
+spec:
+  ports:
+    - name: http
+      port: 9200
+      targetPort: http
+    - name: transport
+      port: 9300
+      targetPort: transport
+  selector:
+    app: {{ template "elasticsearch-single-node.name" . }}
+    release: {{ .Release.Name }}
+  type: {{ .Values.serviceType }}
+  
+# /spec

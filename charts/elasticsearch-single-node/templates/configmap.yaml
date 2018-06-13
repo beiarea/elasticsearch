@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "elasticsearch-single-node.fullname" . }}
+  labels:
+    app: {{ template "elasticsearch-single-node.fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+data:
+  elasticsearch.yml: |-
+    cluster.name: {{ .Values.cluster.name }}
+
+    network.host: 0.0.0.0
+
+    # see https://github.com/kubernetes/kubernetes/issues/3595
+    bootstrap.memory_lock: ${BOOTSTRAP_MEMORY_LOCK:false}
+
+    discovery:
+      zen:
+        # minimum_master_nodes need to be explicitly set when bound on a public IP
+        # set to 1 to allow single node clusters
+        # Details: https://github.com/elastic/elasticsearch/pull/17288
+        minimum_master_nodes: 1
+
+    # see https://www.elastic.co/guide/en/x-pack/current/xpack-settings.html
+    xpack.ml.enabled: ${XPACK_ML_ENABLED:false}
+    xpack.monitoring.enabled: ${XPACK_MONITORING_ENABLED:false}
+    xpack.security.enabled: ${XPACK_SECURITY_ENABLED:false}
+    xpack.watcher.enabled: ${XPACK_WATCHER_ENABLED:false}
+
+    # see https://github.com/elastic/elasticsearch-definitive-guide/pull/679
+    processors: ${PROCESSORS:}
+
+    {{- if .Values.cluster.config }}
+    {{ toYaml .Values.cluster.config | indent 4 | trim }}
+    {{- end }}
+  
+  log4j2.properties: |-
+    status = error
+    appender.console.type = Console
+    appender.console.name = console
+    appender.console.layout.type = PatternLayout
+    appender.console.layout.pattern = [%d{ISO8601}][%-5p][%-25c{1.}] %marker%m%n
+    rootLogger.level = info
+    rootLogger.appenderRef.console.ref = console
+    logger.searchguard.name = com.floragunn
+    logger.searchguard.level = info

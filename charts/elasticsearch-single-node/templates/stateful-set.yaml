@@ -1,0 +1,189 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  labels:
+    app: {{ template "elasticsearch-single-node.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+  name: {{ template "elasticsearch-single-node.fullname" . }}
+spec:
+  serviceName: {{ template "elasticsearch-single-node.fullname" . }}
+  replicas: 1
+  template:
+    
+    metadata:
+      labels:
+        app: {{ template "elasticsearch-single-node.name" . }}
+        release: {{ .Release.Name }}
+      {{- if .Values.podAnnotations }}
+      annotations:
+        {{ toYaml .Values.podAnnotations | indent 8 | trim }}
+      {{- end }}
+    # /metadata
+    
+    spec:
+      
+      {{- if eq .Values.antiAffinity "hard" }}
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: "kubernetes.io/hostname"
+              labelSelector:
+                matchLabels:
+                  app: "{{ template "elasticsearch-single-node.name" . }}"
+                  release: "{{ .Release.Name }}"
+      {{- else if eq .Values.antiAffinity "soft" }}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  app: "{{ template "elasticsearch-single-node.name" . }}"
+                  release: "{{ .Release.Name }}"
+      {{- end }}
+      
+      initContainers:
+        
+        # see https://www.elastic.co/guide/en/elasticsearch/reference/current/vm-max-map-count.html
+        # and https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-configuration-memory.html#mlockall
+        - name: "sysctl"
+          image: "busybox"
+          imagePullPolicy: "Always"
+          command: ["sysctl", "-w", "vm.max_map_count=262144"]
+          securityContext:
+            privileged: true
+        
+        - name: "chown"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          command:
+          - /bin/bash
+          - -c
+          - chown -R elasticsearch:elasticsearch /usr/share/elasticsearch/data &&
+            chown -R elasticsearch:elasticsearch /usr/share/elasticsearch/logs
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+          - mountPath: /usr/share/elasticsearch/data
+            name: data
+      
+      # /initContainers
+      
+      containers:
+      
+        - name: elasticsearch
+        
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          
+          env:
+            
+            - name: PROCESSORS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            
+            - name: ES_JAVA_OPTS
+              value: "-Djava.net.preferIPv4Stack=true -Xms{{ .Values.heapSize }} -Xmx{{ .Values.heapSize }}"
+            
+            {{- if .Values.cluster.env }}
+            {{- range $key, $value := .Values.cluster.env }}
+            - name: {{ $key | quote }}
+              value: {{ $value | quote }}
+            {{- end }}
+            {{- end }}
+          
+          # /env
+          
+          ports:
+          
+            - containerPort: 9300
+              name: transport
+            
+            - containerPort: 9200
+              name: http
+          
+          # /ports
+          
+          resources:
+            {{ toYaml .Values.resources | indent 12 | trim }}
+          
+          readinessProbe:
+            {{ toYaml .Values.readinessProbe | indent 12 | trim }}
+          
+          volumeMounts:
+            
+            - mountPath: /usr/share/elasticsearch/data
+              name: data
+              
+            - mountPath: /usr/share/elasticsearch/config/elasticsearch.yml
+              name: config
+              subPath: elasticsearch.yml
+              
+            - mountPath: /usr/share/elasticsearch/config/log4j2.properties
+              name: config
+              subPath: log4j2.properties
+              
+          # /volumeMounts
+          
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/bash","/pre-stop-hook.sh"]
+            # /lifecycle
+        
+      # /containers
+      
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      
+      volumes:
+        - name: config
+          configMap:
+            name: {{ template "elasticsearch-single-node.fullname" . }}
+        
+        {{- if not .Values.persistence.enabled }}
+        
+        - name: data
+          emptyDir: {}
+        
+        {{- end }}
+      
+      # /volumes
+  
+  # /template
+  
+  {{- if .Values.persistence.enabled  }}
+  
+  volumeClaimTemplates:
+    - metadata:
+        name: {{ .Values.persistence.name }}
+      spec:
+        accessModes:
+          - {{ .Values.persistence.accessMode | quote }}
+        
+        {{- if .Values.persistence.storageClass }}
+        {{- if (eq "-" .Values.persistence.storageClass) }}
+        
+        storageClassName: ""
+        
+        {{- else }}
+        
+        storageClassName: "{{ .Values.persistence.storageClass }}"
+        
+        {{- end }}
+        {{- end }}
+        
+        resources:
+          requests:
+            storage: "{{ .Values.persistence.size }}"
+  
+  # /volumeClaimTemplates
+  
+  {{- end }}
+  
+# /spec

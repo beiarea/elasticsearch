@@ -1,0 +1,43 @@
+# Default values
+
+prependReleaseName: true
+
+image:
+  repository: "docker.elastic.co/elasticsearch/elasticsearch"
+  tag: "6.2.3"
+  pullPolicy: "IfNotPresent"
+
+cluster:
+  name: "elasticsearch-single-node"
+  config:
+  env: {}
+
+serviceType: ClusterIP
+
+heapSize: "512m"
+
+persistence:
+  enabled: true
+  accessMode: ReadWriteOnce
+  name: data
+  size: "2Gi"
+
+# This chart is only for DEVELOPMENT instances, so don't give it much grace
+# when shutting down
+terminationGracePeriodSeconds: 30
+
+antiAffinity: "soft"
+
+resources:
+  limits:
+    cpu: "1"
+    memory: "1024Mi"
+  requests:
+    cpu: "25m"
+    memory: "512Mi"
+
+readinessProbe:
+  httpGet:
+    path: /_cluster/health?local=true
+    port: 9200
+  initialDelaySeconds: 5

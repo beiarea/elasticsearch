@@ -5,6 +5,8 @@
 # This is here and in Chart.yaml..?
 appVersion: "6.2.3"
 
+prependReleaseName: true
+
 image:
   repository: "beiarea/elasticsearch"
   tag: "6.2.3"

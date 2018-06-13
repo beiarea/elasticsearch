@@ -12,7 +12,11 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 */}}
 {{- define "elasticsearch.fullname" -}}
 {{- $name := default .Chart.Name .Values.nameOverride -}}
+{{- if .Values.prependReleaseName -}}
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
 {{- end -}}
 
 {{/*
@@ -21,7 +25,11 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 */}}
 {{- define "elasticsearch.client.fullname" -}}
 {{- $name := default .Chart.Name .Values.nameOverride -}}
+{{- if .Values.prependReleaseName -}}
 {{- printf "%s-%s-%s" .Release.Name $name .Values.client.name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" $name .Values.client.name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
 {{- end -}}
 
 {{/*
@@ -30,7 +38,11 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 */}}
 {{- define "elasticsearch.data.fullname" -}}
 {{- $name := default .Chart.Name .Values.nameOverride -}}
+{{- if .Values.prependReleaseName -}}
 {{- printf "%s-%s-%s" .Release.Name $name .Values.data.name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" $name .Values.data.name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
 {{- end -}}
 
 {{/*
@@ -39,5 +51,9 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 */}}
 {{- define "elasticsearch.master.fullname" -}}
 {{- $name := default .Chart.Name .Values.nameOverride -}}
+{{- if .Values.prependReleaseName -}}
 {{- printf "%s-%s-%s" .Release.Name $name .Values.master.name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" $name .Values.master.name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
 {{- end -}}

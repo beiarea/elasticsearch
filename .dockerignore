@@ -31,11 +31,8 @@
 # In alphabetical order so it's easy to line up with tree view.
 #
 
-# Deployment stuff (Helm chart)
-dev/
-
-# Development-only stuff
-deploy/
+# Helm charts
+charts/
 
 # Assorted temp stuffs
 tmp/

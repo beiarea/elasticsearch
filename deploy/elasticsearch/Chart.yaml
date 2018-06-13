@@ -30,4 +30,4 @@ sources:
 - https://github.com/jetstack/elasticsearch-pet
 - https://github.com/giantswarm/kubernetes-elastic-stack
 - https://github.com/GoogleCloudPlatform/elasticsearch-docker
-version: 0.1.0
+version: 0.1.1

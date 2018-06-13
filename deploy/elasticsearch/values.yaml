@@ -43,6 +43,19 @@ client:
   ## (dict) If specified, apply these annotations to each client Pod
   # podAnnotations:
   #   example: client-foo
+  
+  readinessProbe:
+    httpGet:
+      path: /_cluster/health?wait_for_status=yellow
+      port: 9200
+    initialDelaySeconds: 5
+  
+  # Giving up means restarting the pod
+  livenessProbe:
+    httpGet:
+      path: /_cluster/health?wait_for_status=yellow
+      port: 9200
+    initialDelaySeconds: 90
 
 master:
   name: master

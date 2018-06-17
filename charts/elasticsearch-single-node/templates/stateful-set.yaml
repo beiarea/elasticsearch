@@ -130,12 +130,6 @@ spec:
               subPath: log4j2.properties
               
           # /volumeMounts
-          
-          lifecycle:
-            preStop:
-              exec:
-                command: ["/bin/bash","/pre-stop-hook.sh"]
-            # /lifecycle
         
       # /containers
       
